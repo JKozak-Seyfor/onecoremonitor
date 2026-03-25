@@ -6,7 +6,7 @@ import streamlit as st
 WEBHOOK_URL = "https://hook.eu2.make.com/38aryc6wvmu0ncdfwefttmhnxpa2drjo"
 
 st.set_page_config(page_title="JSON → Webhook sender", page_icon="📨", layout="centered")
-st.title("📨 Odeslání JSON souboru na webhook")
+st.title("📨 OneCore Monitor Input")
 
 st.write("Nahraj JSON soubor a odešli ho na webhook.")
 
