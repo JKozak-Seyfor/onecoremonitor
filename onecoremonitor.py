@@ -7,20 +7,18 @@ WEBHOOK_URL = "https://hook.eu2.make.com/38aryc6wvmu0ncdfwefttmhnxpa2drjo"
 
 st.set_page_config(page_title="JSON → Webhook sender", page_icon="📨", layout="centered")
 st.title("📨 OneCore Monitor Input")
-
 st.write("Nahraj JSON soubor a odešli ho na webhook.")
 
+email = st.text_input("E-mailová adresa", placeholder="jmeno@domena.cz")
+
 uploaded = st.file_uploader("Vyber .json soubor", type=["json"])
-
 json_data = None
-
 if uploaded is not None:
     try:
         raw_bytes = uploaded.read()
         raw_text = raw_bytes.decode("utf-8")
         json_data = json.loads(raw_text)
         st.success("JSON je validní ✅")
-
     except UnicodeDecodeError:
         st.error("Soubor nejde dekódovat jako UTF-8. Ujisti se, že je uložený v UTF-8.")
     except json.JSONDecodeError as e:
@@ -31,27 +29,28 @@ st.divider()
 send_btn = st.button(
     "Odeslat na webhook",
     type="primary",
-    disabled=(json_data is None)
+    disabled=(json_data is None or not email)
 )
 
-if send_btn and json_data is not None:
+if send_btn and json_data is not None and email:
+    payload = {
+        "email": email,
+        "data": json_data,
+    }
     try:
         with st.spinner("Odesílám…"):
             resp = requests.post(
                 WEBHOOK_URL,
-                json=json_data,
+                json=payload,
                 timeout=20,
             )
-
         st.write(f"Status: **{resp.status_code}**")
-
         if 200 <= resp.status_code < 300:
             st.success("Odesláno ✅")
         else:
             st.error("Webhook vrátil chybu ❌")
             if resp.text:
                 st.code(resp.text[:4000])
-
     except requests.exceptions.Timeout:
         st.error("Timeout při odesílání.")
     except requests.exceptions.RequestException as e:
